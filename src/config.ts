@@ -4,6 +4,6 @@ dotenv.config();
 export const config = {
   port: Number(process.env.PORT!),
   jwtSecretKey: process.env.JWTSECRET!,
-  jwtTokenExpiresIn: process.env.JWTTOKENEXPIRESIN!,
-  mongoURL: process.env.MONGO_URL!
+  mongoURL: process.env.MONGO_URL!,
+  jwtTokenExpiresIn: process.env.TOKEN_EXPIRES_IN!,
 };
