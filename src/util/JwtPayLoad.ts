@@ -1,3 +1,4 @@
+import { Response } from 'express';
 import { config } from './../config';
 import * as jwt from 'jsonwebtoken';
 
@@ -20,6 +21,10 @@ const createToken = (payload: JWTPayLoad): string => {
   return token;
 };
 
+const reCreateToken = (response: Response): string => {
+  return createToken(response.locals.jwtPayLoad);
+};
+
 const resolveToken = (token: string): JWTPayLoad => {
   return jwt.verify(token, config.jwtSecretKey) as JWTPayLoad;
 };
@@ -27,4 +32,5 @@ const resolveToken = (token: string): JWTPayLoad => {
 export const JWT = {
   resolveToken,
   createToken,
+  reCreateToken,
 };
