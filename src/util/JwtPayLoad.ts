@@ -2,12 +2,12 @@ import { Response } from 'express';
 import { config } from './../config';
 import * as jwt from 'jsonwebtoken';
 
-export interface JWTPayLoad {
+export interface TokenParams {
   userId: string;
   username: string;
 }
 
-const createToken = (payload: JWTPayLoad): string => {
+const createToken = (payload: TokenParams): string => {
   const token = jwt.sign(
     {
       userId: payload.userId,
@@ -22,15 +22,20 @@ const createToken = (payload: JWTPayLoad): string => {
 };
 
 const reCreateToken = (response: Response): string => {
-  return createToken(response.locals.jwtPayLoad);
+  return createToken(response.locals.tokenParams);
 };
 
-const resolveToken = (token: string): JWTPayLoad => {
-  return jwt.verify(token, config.jwtSecretKey) as JWTPayLoad;
+const resolveToken = (token: string): TokenParams => {
+  return jwt.verify(token, config.jwtSecretKey) as TokenParams;
+};
+
+const verifyToken = (token: string): TokenParams => {
+  return jwt.verify(token, config.jwtSecretKey) as TokenParams;
 };
 
 export const JWT = {
   resolveToken,
   createToken,
   reCreateToken,
+  verifyToken,
 };

@@ -1,40 +1,35 @@
-//import { EnumUserRole, UserModel } from './../model/user.model';
 import { HttpError } from './../util/HttpError';
-import { config } from './../config';
 import { Request, Response, NextFunction } from 'express';
-import * as jwt from 'jsonwebtoken';
-import { JWT, JWTPayLoad } from './../util/JwtPayLoad';
-import { UserService } from './../services/user.service';
+import { JWT, TokenParams } from './../util/JwtPayLoad';
+import { UserEntity } from '../entities/user.entity';
 
 export const checkAuthentication = async (req: Request, res: Response, next: NextFunction) => {
-  let jwtPayLoad: JWTPayLoad;
+  let tokenParams: TokenParams;
 
   // Get the token from the head
   const token = <string>req.headers['auth'];
 
-  // Try to validate the token and get data
+  // Try to validate token and get data
   try {
-    jwtPayLoad = jwt.verify(token, config.jwtSecretKey) as JWTPayLoad;
-    res.locals.jwtPayLoad = jwtPayLoad;
+    tokenParams = JWT.verifyToken(token);
+    res.locals.tokenParams = tokenParams;
 
-    const user = await UserService.getUserById(jwtPayLoad.userId, next);
+    // Getting user entity
+    const user = await UserEntity.findById(tokenParams.userId);
     if (user) {
       req.body.currentUser = user;
     } else {
-      next(new HttpError('..User not found'));
+      next(new HttpError('user not found'));
       return;
     }
   } catch (error) {
-    console.log('Token is not valid:' + error);
+    console.log('Token is not valid,', error);
     next(new HttpError('Token is not valid'));
     return;
   }
 
-  //The token is valid for 1 hour
-  //We want to send a new token on every request
-  // Creating token
-  const newToken = JWT.createToken(jwtPayLoad); // { userId: jwtPayLoad.userId, username: jwtPayLoad.username });
-
+  // Send new token on every request
+  const newToken = JWT.createToken(tokenParams);
   res.setHeader('auth', newToken);
 
   next();
